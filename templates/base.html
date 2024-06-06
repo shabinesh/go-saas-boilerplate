@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Title Here</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <!-- <link href="https://unpkg.com/bonsai.css@latest/dist/bonsai.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
+    
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            Template
+        </div>
+        <nav>
+            <menu>
+              <li>
+                <a href="#">Viennoiseries</a>
+                <menu>
+                  <li><a href="#">Croissant</a></li>
+                  <li><a href="#">Éclair</a></li>
+                  <li>
+                    <a href="#">Tartelettes</a>
+                    <menu>
+                      <li><a href="#">Aux mûres</a></li>
+                      <li><a href="#">Aux framboises</a></li>
+                      <li class="disabled"><a href="#">Aux fraises</a></li>
+                    </menu>
+                  </li>
+                  <li><a href="#">Pain au chocolat</a></li>
+                </menu>
+              </li>
+              <li class="selected"><a href="#">Macarons</a></li>
+              <li class="disabled"><a href="#">Pain perdu</a></li>
+            </menu>
+          </nav>
+        <!-- Your content goes here -->
+
+        <div id="content">
+        {{ block "content" . }} {{ end }}
+        </div>
+    </div>
+</body>
+</html>

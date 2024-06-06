@@ -1,0 +1,9 @@
+{{ define "content" }}
+<h1>Log In</h1>
+<form hx-post="/login" hx-swap="outerHTML" hx-trigger="click">
+    <label for="email">Email:</label>
+    <input type="text" id="email" name="email" required>
+    <br>
+    <input type="submit" value="Get OTP">
+</form>
+{{ end }}
