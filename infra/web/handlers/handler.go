@@ -16,7 +16,8 @@ var emailTemplates = template.Must(
 type UserService interface {
 	Register(email string, info map[string]string) (*user.User, error)
 	VerifyCode(userID string, otp string) error
-	Login(email, otp string) (*user.User, error)
+	SendOTP(email string) error
+	Authenticate(email, code string) (*user.User, error)
 	GetUser(email string) (*user.User, error)
 }
 

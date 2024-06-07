@@ -31,7 +31,7 @@ func (u *UserRepo) FindUser(id string) (*user.User, bool, error) {
 func (u *UserRepo) FindUserByEmail(email string) (*user.User, bool, error) {
 	r := u.db.QueryRow("SELECT * FROM users WHERE email = ?", email)
 	var uu user.User
-	err := r.Scan(uu.ID, uu.Email, uu.IsVerified, uu.IsActive, uu.CreatedAt)
+	err := r.Scan(&uu.ID, &uu.Email, &uu.IsVerified, &uu.IsActive, &uu.CreatedAt)
 	if err != nil {
 		return nil, false, err
 	}

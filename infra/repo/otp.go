@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/shabinesh/transcription/core/user"
 )
@@ -29,6 +30,10 @@ func (o *otpRepository) GetOTP(userID user.UserID) (*user.OTP, error) {
 	var otp user.OTP
 	err := o.db.QueryRow("SELECT id, user_id, otp_code, created_at FROM otps WHERE user_id = ?", userID).Scan(&otp.ID, &otp.UserID, &otp.Code, &otp.CreatedAt)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("invalid otp")
+		}
+
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -47,6 +48,46 @@ func (h handlers) Register(r *gin.Context) {
 	r.HTML(http.StatusOK, "get_otp", gin.H{})
 }
 
+func (h handlers) Login(r *gin.Context) {
+	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
+	if r.Request.Method == http.MethodGet {
+		_, ok := sess.Values["email"]
+		if !ok {
+			r.HTML(http.StatusOK, "login_get_email", gin.H{})
+			return
+		}
+	}
+
+	email := r.PostForm("email")
+	sess.Values["email"] = email
+	sess.Save(r.Request, r.Writer)
+
+	code := r.PostForm("code")
+	fmt.Println("code", code)
+	if code == "" {
+		if err := h.userService.SendOTP(email); err != nil {
+			slog.Error(err.Error())
+			r.Writer.WriteHeader(http.StatusInternalServerError)
+			r.Writer.Write([]byte(err.Error()))
+		}
+
+		r.HTML(http.StatusOK, "login_get_code", gin.H{"email": email})
+
+		return
+	}
+
+	if _, err := h.userService.Authenticate(email, code); err != nil {
+		slog.Error(err.Error())
+		r.Writer.WriteHeader(http.StatusBadRequest)
+		r.HTML(http.StatusOK, "login_get_code", gin.H{
+			"email": email,
+			"Error": err.Error(),
+		})
+
+		return
+	}
+}
+
 func (h handlers) GetOTP(r *gin.Context) {
 	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
 
@@ -76,18 +117,18 @@ func (h handlers) GetOTP(r *gin.Context) {
 	}
 
 	if intent == "login" {
-		email := sess.Values["email"]
-		code := r.PostForm("code")
+		//email := sess.Values["email"]
+		//code := r.PostForm("code")
 
-		if _, err := h.userService.Login(email.(string), code); err != nil {
-			slog.Error(err.Error())
-			r.Writer.WriteHeader(http.StatusBadRequest)
-			r.HTML(http.StatusOK, "get_otp", gin.H{
-				"Error": err.Error(),
-			})
+		// if _, err := h.userService.Login(email.(string), code); err != nil {
+		// 	slog.Error(err.Error())
+		// 	r.Writer.WriteHeader(http.StatusBadRequest)
+		// 	r.HTML(http.StatusOK, "get_otp", gin.H{
+		// 		"Error": err.Error(),
+		// 	})
 
-			return
-		}
+		// 	return
+		// }
 
 		sess.Values["authenticated"] = true
 		err := sess.Save(r.Request, r.Writer)
@@ -105,17 +146,18 @@ func (h handlers) GetOTP(r *gin.Context) {
 	})
 }
 
-func (h handlers) Login(r *gin.Context) {
+func (h handlers) SendOTP(r *gin.Context) {
 	if r.Request.Method == http.MethodGet {
 		r.HTML(http.StatusOK, "login", gin.H{})
 		return
 	}
 
 	email := r.PostForm("email")
+	intent := r.PostForm("intent")
 
 	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
 	sess.Values["email"] = email
-	sess.Values["intent"] = "login"
+	sess.Values["intent"] = intent
 	err := sess.Save(r.Request, r.Writer)
 	if err != nil {
 		slog.Error(err.Error())
@@ -123,6 +165,12 @@ func (h handlers) Login(r *gin.Context) {
 		r.Writer.Write([]byte(err.Error()))
 
 		return
+	}
+
+	if err := h.userService.SendOTP(email); err != nil {
+		slog.Error(err.Error())
+		r.Writer.WriteHeader(http.StatusInternalServerError)
+		r.Writer.Write([]byte(err.Error()))
 	}
 
 	r.HTML(http.StatusOK, "get_otp", gin.H{})

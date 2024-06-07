@@ -38,15 +38,19 @@ func NewUserService(userStore UserStore, otpProcessor OTPProcessor, mailer Maile
 	return &UserService{userStore: userStore, otpProcessor: otpProcessor, mailer: mailer}
 }
 
-func (a *UserService) Login(email, code string) (*User, error) {
-	otp := a.otpProcessor.Generate(string(u.ID))
-
-	err := a.mailer.SendEmail(email, EmailVerifcationSubject, fmt.Sprintf(EmailVerificationBody, otp))
+func (a *UserService) SendOTP(email string) error {
+	u, found, err := a.userStore.FindUserByEmail(email)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return u, nil
+	if !found {
+		return errors.New("user not found")
+	}
+
+	otp := a.otpProcessor.Generate(string(u.ID))
+
+	return a.mailer.SendEmail(email, EmailVerifcationSubject, fmt.Sprintf(EmailVerificationBody, otp))
 }
 
 func (a *UserService) Authenticate(email string, otp string) (*User, error) {
@@ -78,9 +82,7 @@ func (a *UserService) Register(email string, info map[string]string) (*User, err
 			return nil, err
 		}
 
-		otp := a.otpProcessor.Generate(string(u.ID))
-
-		err = a.mailer.SendEmail(email, EmailVerifcationSubject, fmt.Sprintf(EmailVerificationBody, otp))
+		err = a.SendOTP(email)
 		if err != nil {
 			return nil, err
 		}

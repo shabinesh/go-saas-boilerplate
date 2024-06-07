@@ -18,7 +18,8 @@ func createRender() multitemplate.Renderer {
 	r.AddFromFiles("register", "templates/base.html", "templates/auth/register.html")
 	r.AddFromFiles("get_otp", "templates/auth/get_otp.html")
 	r.AddFromFiles("message", "templates/message.html")
-	r.AddFromFiles("login", "templates/base.html", "templates/auth/login.html")
+	r.AddFromFiles("login_get_email", "templates/base.html", "templates/auth/login_get_email.html")
+	r.AddFromFiles("login_get_code", "templates/auth/login_get_code.html")
 
 	return r
 }
