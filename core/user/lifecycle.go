@@ -1,9 +1,9 @@
 package user
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
-	"log/slog"
 )
 
 var (
@@ -40,7 +40,6 @@ func NewUserService(userStore UserStore, otpProcessor OTPProcessor, mailer Maile
 }
 
 func (a *UserService) SendOTP(email string) error {
-	slog.Info("Sending OTP to email", email)
 	u, found, err := a.userStore.FindUserByEmail(email)
 	if err != nil {
 		return fmt.Errorf("failed to find user: %w", err)
@@ -83,23 +82,25 @@ func (a *UserService) Authenticate(email string, otp string) (*User, error) {
 
 func (a *UserService) Register(email string, info map[string]string) (*User, error) {
 	_, found, err := a.userStore.FindUserByEmail(email)
-	if !found {
-		u, err := a.userStore.AddUser(&User{Email: email})
-		if err != nil {
-			return nil, err
-		}
-
-		err = a.SendOTP(email)
-		if err != nil {
-			return nil, err
-		}
-
-		return u, nil
-	} else if err != nil {
-		return &User{}, err
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
 	}
 
-	return nil, fmt.Errorf("User already exists with this email")
+	if found {
+		return nil, ErrorUserExists
+	}
+
+	u, err := a.userStore.AddUser(&User{Email: email})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.SendOTP(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (a *UserService) VerifyCode(userID, otp string) error {
