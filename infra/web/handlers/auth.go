@@ -53,6 +53,14 @@ func (h handlers) Authenticate(r *gin.Context) {
 	email := r.PostForm("email")
 	code := r.PostForm("code")
 
+	if email == "" || code == "" {
+		r.Writer.WriteHeader(http.StatusBadRequest)
+		r.HTML(http.StatusBadRequest, "login_get_code", gin.H{
+			"email": email,
+			"error": "email and code are required",
+		})
+	}
+
 	if _, err := h.userService.Authenticate(email, code); err != nil {
 		slog.Error(err.Error())
 		r.Writer.WriteHeader(http.StatusBadRequest)
@@ -122,23 +130,22 @@ func (h handlers) LoginPage(r *gin.Context) {
 		return
 	}
 
-	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
-	sess.Values["email"] = email
-	err := sess.Save(r.Request, r.Writer)
-	if err != nil {
-		slog.Error(err.Error())
-	}
-
-	err = h.userService.SendOTP(email)
+	err := h.userService.SendOTP(email)
 	if err != nil {
 		slog.Error("Error sending OTP", err.Error(), nil)
-	}
-
-	if err != nil {
 		r.HTML(http.StatusOK, "login_get_email", gin.H{"error": err.Error()})
 
 		return
 	}
 
 	r.HTML(http.StatusOK, "login_get_code", gin.H{"email": email})
+}
+
+func (h handlers) Logout(r *gin.Context) {
+	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
+	delete(sess.Values, "authenticated")
+	sess.Options.MaxAge = -1
+	sess.Save(r.Request, r.Writer)
+
+	r.Redirect(http.StatusFound, "/login")
 }

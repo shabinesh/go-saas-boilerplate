@@ -42,6 +42,7 @@ func StartServer(db *sql.DB) {
 	server.GET("/login", handlers.LoginPage)
 	server.POST("/login", handlers.LoginPage)
 	server.POST("/authenticate", handlers.Authenticate)
+	server.GET("/logout", handlers.Logout)
 
 	// protected routes
 	protected := server.Group("/app")
