@@ -19,7 +19,8 @@ func createRender() multitemplate.Renderer {
 	r.AddFromFiles("get_otp", "templates/auth/get_otp.html")
 	r.AddFromFiles("message", "templates/message.html")
 	r.AddFromFiles("login_get_email", "templates/base.html", "templates/auth/login_get_email.html")
-	r.AddFromFiles("login_get_code", "templates/auth/login_get_code.html")
+	r.AddFromFiles("login_get_code", "templates/base.html", "templates/auth/login_get_code.html")
+	r.AddFromFiles("home", "templates/base.html", "templates/app/home.html")
 
 	return r
 }
@@ -38,8 +39,16 @@ func StartServer(db *sql.DB) {
 	server.GET("/register", handlers.RegisterPage)
 	server.POST("/register", handlers.Register)
 	server.POST("/verify-otp", handlers.GetOTP)
-	server.GET("/login", handlers.Login)
-	server.POST("/login", handlers.Login)
+	server.GET("/login", handlers.LoginPage)
+	server.POST("/login", handlers.LoginPage)
+	server.POST("/authenticate", handlers.Authenticate)
+
+	// protected routes
+	protected := server.Group("/app")
+	protected.Use(handlers.RequireAuth())
+	{
+		protected.GET("/home", handlers.HomePage)
+	}
 
 	server.Run()
 }

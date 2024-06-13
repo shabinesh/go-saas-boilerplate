@@ -1,8 +1,15 @@
-<form hx-post="/login" hx-trigger="click">
+{{ define "content"}}
+<form action="/authenticate" method="post">
+    <h3>A code is sent to your email</h3>
     <label for="email">Email:</label>
-    <input type="text" id="email" name="email" value="{{.email}}" required disabled>
+    <input type="text" id="email" name="email" {{ if .email }} value="{{.email}}" {{ end }} required>
     <br>
-    <label for="otp">OTP:</label>
-    <input type="text" id="otp" name="otp" required>
-    <input type="submit" value="Get OTP">
+    <label for="code">OTP</label>
+    <input type="text" id="code" name="code" required>
+    {{ if .error }}
+        <pre style="color: red;">{{ .error }}</pre>
+    {{ end }}
+    <br>
+    <input type="submit" value="login">
 </form>
+{{ end }}

@@ -33,6 +33,10 @@ func (u *UserRepo) FindUserByEmail(email string) (*user.User, bool, error) {
 	var uu user.User
 	err := r.Scan(&uu.ID, &uu.Email, &uu.IsVerified, &uu.IsActive, &uu.CreatedAt)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, false, nil
+		}
+
 		return nil, false, err
 	}
 

@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 )
 
 var (
@@ -39,9 +40,10 @@ func NewUserService(userStore UserStore, otpProcessor OTPProcessor, mailer Maile
 }
 
 func (a *UserService) SendOTP(email string) error {
+	slog.Info("Sending OTP to email", email)
 	u, found, err := a.userStore.FindUserByEmail(email)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to find user: %w", err)
 	}
 
 	if !found {
@@ -56,7 +58,7 @@ func (a *UserService) SendOTP(email string) error {
 func (a *UserService) Authenticate(email string, otp string) (*User, error) {
 	user, found, err := a.userStore.FindUserByEmail(email)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
 
 	if !found {
@@ -67,7 +69,12 @@ func (a *UserService) Authenticate(email string, otp string) (*User, error) {
 		return nil, errors.New("user not active")
 	}
 
-	if ok, err := a.otpProcessor.Verify(string(user.ID), otp); err != nil || !ok {
+	ok, err := a.otpProcessor.Verify(string(user.ID), otp)
+	if err != nil {
+		return nil, fmt.Errorf("failed to verify otp: %w", err)
+	}
+
+	if !ok {
 		return nil, errors.New("invalid otp")
 	}
 

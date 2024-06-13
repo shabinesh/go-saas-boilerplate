@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -48,43 +47,31 @@ func (h handlers) Register(r *gin.Context) {
 	r.HTML(http.StatusOK, "get_otp", gin.H{})
 }
 
-func (h handlers) Login(r *gin.Context) {
+func (h handlers) Authenticate(r *gin.Context) {
 	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
-	if r.Request.Method == http.MethodGet {
-		_, ok := sess.Values["email"]
-		if !ok {
-			r.HTML(http.StatusOK, "login_get_email", gin.H{})
-			return
-		}
-	}
 
 	email := r.PostForm("email")
-	sess.Values["email"] = email
-	sess.Save(r.Request, r.Writer)
-
 	code := r.PostForm("code")
-	fmt.Println("code", code)
-	if code == "" {
-		if err := h.userService.SendOTP(email); err != nil {
-			slog.Error(err.Error())
-			r.Writer.WriteHeader(http.StatusInternalServerError)
-			r.Writer.Write([]byte(err.Error()))
-		}
-
-		r.HTML(http.StatusOK, "login_get_code", gin.H{"email": email})
-
-		return
-	}
 
 	if _, err := h.userService.Authenticate(email, code); err != nil {
 		slog.Error(err.Error())
 		r.Writer.WriteHeader(http.StatusBadRequest)
-		r.HTML(http.StatusOK, "login_get_code", gin.H{
+		r.HTML(http.StatusForbidden, "login_get_code", gin.H{
 			"email": email,
-			"Error": err.Error(),
+			"error": err.Error(),
 		})
 
 		return
+	} else {
+		sess.Values["authenticated"] = true
+		err := sess.Save(r.Request, r.Writer)
+		if err != nil {
+			slog.Error(err.Error())
+
+			return
+		}
+
+		r.Redirect(http.StatusFound, "/app/home")
 	}
 }
 
@@ -116,62 +103,42 @@ func (h handlers) GetOTP(r *gin.Context) {
 		}
 	}
 
-	if intent == "login" {
-		//email := sess.Values["email"]
-		//code := r.PostForm("code")
-
-		// if _, err := h.userService.Login(email.(string), code); err != nil {
-		// 	slog.Error(err.Error())
-		// 	r.Writer.WriteHeader(http.StatusBadRequest)
-		// 	r.HTML(http.StatusOK, "get_otp", gin.H{
-		// 		"Error": err.Error(),
-		// 	})
-
-		// 	return
-		// }
-
-		sess.Values["authenticated"] = true
-		err := sess.Save(r.Request, r.Writer)
-		if err != nil {
-			slog.Error(err.Error())
-			r.Writer.WriteHeader(http.StatusInternalServerError)
-			r.Writer.Write([]byte(err.Error()))
-
-			return
-		}
-	}
-
 	r.HTML(http.StatusOK, "message", gin.H{
 		"Message": registrationVerifiedMessage,
 	})
 }
 
-func (h handlers) SendOTP(r *gin.Context) {
+func (h handlers) LoginPage(r *gin.Context) {
 	if r.Request.Method == http.MethodGet {
-		r.HTML(http.StatusOK, "login", gin.H{})
+		r.HTML(http.StatusOK, "login_get_email", gin.H{})
 		return
 	}
 
 	email := r.PostForm("email")
-	intent := r.PostForm("intent")
 
-	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
-	sess.Values["email"] = email
-	sess.Values["intent"] = intent
-	err := sess.Save(r.Request, r.Writer)
-	if err != nil {
-		slog.Error(err.Error())
-		r.Writer.WriteHeader(http.StatusInternalServerError)
-		r.Writer.Write([]byte(err.Error()))
+	if email == "" {
+		r.HTML(http.StatusBadRequest, "login_get_email", gin.H{"error": "email is required"})
 
 		return
 	}
 
-	if err := h.userService.SendOTP(email); err != nil {
+	sess, _ := h.sessionStore.Get(r.Request, sessionKey)
+	sess.Values["email"] = email
+	err := sess.Save(r.Request, r.Writer)
+	if err != nil {
 		slog.Error(err.Error())
-		r.Writer.WriteHeader(http.StatusInternalServerError)
-		r.Writer.Write([]byte(err.Error()))
 	}
 
-	r.HTML(http.StatusOK, "get_otp", gin.H{})
+	err = h.userService.SendOTP(email)
+	if err != nil {
+		slog.Error("Error sending OTP", err.Error(), nil)
+	}
+
+	if err != nil {
+		r.HTML(http.StatusOK, "login_get_email", gin.H{"error": err.Error()})
+
+		return
+	}
+
+	r.HTML(http.StatusOK, "login_get_code", gin.H{"email": email})
 }
