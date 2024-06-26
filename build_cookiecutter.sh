@@ -8,7 +8,7 @@ git switch -c main
 git rebase dev
 
 
-find . -not -path './build_cookiecutter.sh' -not -path './cookiecutter.json' -not -path './test.db' -not -path './.git/*' -not -path './vendor/*' -type f -print0 | xargs -0 sed -i '' -e 's/transcription/{{cookiecutter.package_slug}}/g' -e 's/shabinesh/{{cookiecutter.gh_username}}/g'
+find \{\{cookiecutter.project_slug\}\}/ -not -path './test.db' -not -path './vendor/*' -type f -print0 | xargs -0 sed -i '' -e 's/transcription/{{cookiecutter.package_slug}}/g' -e 's/shabinesh/{{cookiecutter.gh_username}}/g'
 #find . -not -path './build_cookiecutter.sh' -not -path './cookiecutter.json' -not -path './test.db' -not -path './.git/*' -not -path './vendor/*' -type f -print0 | xargs -0 sed -i '' 's/shabinesh/{{cookiecutter.gh_username}}/g'
 
 sed -e 's/transcription/{{cookiecutter.package_slug}}/g' -e 's/shabinesh/{{cookiecutter.gh_username}}/g' main.go > main.go.tmp && mv main.go.tmp main.go
