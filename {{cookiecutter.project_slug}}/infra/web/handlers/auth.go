@@ -112,7 +112,7 @@ func (h handlers) GetOTP(r *gin.Context) {
 	}
 
 	r.HTML(http.StatusOK, "message", gin.H{
-		"Message": registrationVerifiedMessage,
+		"message": registrationVerifiedMessage,
 	})
 }
 
