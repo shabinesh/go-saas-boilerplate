@@ -13,6 +13,9 @@ find \{\{cookiecutter.project_slug\}\}/ -not -path './test.db' -not -path './ven
 
 sed -e 's/transcription/{{cookiecutter.package_slug}}/g' -e 's/shabinesh/{{cookiecutter.gh_username}}/g' \{\{cookiecutter.project_slug\}\}/main.go > \{\{cookiecutter.project_slug\}\}/main.go.tmp && mv \{\{cookiecutter.project_slug\}\}/main.go.tmp \{\{cookiecutter.project_slug\}\}/main.go
 
+# rename dir
+mv transcription-project \{\{cookiecutter.project_slug\}\}
+
 last_commit_message=$(git log -1 --pretty=%B dev)
 
 git add .
