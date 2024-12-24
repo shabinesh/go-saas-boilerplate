@@ -1,8 +1,0 @@
-<form action="/verify-otp" method="post">
-    <input type="text" class="otp-input" name="code" maxlength="6" pattern="\d{6}" placeholder="123456" required>
-    {{ if .Error }}
-    <strong style="color: #f50000;">{{ .Error }}</strong>
-    {{ end }}
-    <br>
-    <button type="submit" class="submit-button">Verify</button>
-</form>

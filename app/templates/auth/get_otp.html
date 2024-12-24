@@ -1,0 +1,25 @@
+
+<div style="max-width:400px;margin:2rem auto;padding:1.5rem;box-shadow:0 2px 10px rgba(0,0,0,0.1);border-radius:8px">
+    <form hx-post="/verify-otp" hx-swap="outerHTML" hx-trigger="submit">
+        <input type="hidden" name="user_id" value="${user_id}">
+
+        <div style="display:flex;gap:0.5rem;margin:1rem 0">
+            <input type="text" name="d1" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+            <input type="text" name="d2" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+            <input type="text" name="d3" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+            <input type="text" name="d4" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+            <input type="text" name="d5" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+            <input type="text" name="d6" maxlength="1" pattern="[0-9]" inputmode="numeric" required
+                   style="width:2.5rem;height:2.5rem;font-size:1.25rem;text-align:center;border:2px solid #e0e0e0;border-radius:4px;outline:none">
+        </div>
+
+        <button type="submit" style="width:100%;padding:0.75rem;background:#2563eb;color:white;border:none;border-radius:4px;cursor:pointer">
+            Verify
+        </button>
+    </form>
+</div>

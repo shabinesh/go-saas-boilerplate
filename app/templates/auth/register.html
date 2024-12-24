@@ -1,0 +1,28 @@
+{{ define "content" }}
+<h1>Sign Up</h1>
+<form hx-post="/register"
+      hx-swap="outerHTML swap:1s"
+      hx-trigger="submit"
+      hx-indicator="#loading">
+    <div class="form-group">
+        <label for="fullname">Full Name</label>
+        <input type="text"
+               id="fullname"
+               name="fullname"
+               required
+               hx-validate="true">
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email"
+               id="email"
+               name="email"
+               required
+               hx-validate="true">
+    </div>
+    <button type="submit">Register</button>
+    <div id="loading" class="htmx-indicator">
+        Registering...
+    </div>
+</form>
+{{ end }}
