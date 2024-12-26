@@ -3,6 +3,7 @@ package otp
 import (
 	"crypto/rand"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -41,7 +42,7 @@ func (a *OTPService) Generate(userID string) string {
 func (a *OTPService) Verify(userID string, code string) (bool, error) {
 	otp, err := a.OTPRepo.GetOTP(user.UserID(userID))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return false, fmt.Errorf("invalid otp")
 		}
 		return false, err

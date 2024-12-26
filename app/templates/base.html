@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <div class="title">
-            Your Title Here
+            App
         </div>
         <nav>
             <menu>
@@ -38,6 +38,7 @@
         <!-- Your content goes here -->
 
         <div id="content">
+            {{- if .message }} {{ .message }} {{ end -}}
         {{ block "content" . }} {{ end }}
         </div>
     </div>

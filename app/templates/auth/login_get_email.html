@@ -1,5 +1,5 @@
 {{ define "content" }}
-<form action="/login" method="post">
+<form hx-post="/login" hx-swap="outerHTML" hx-trigger="submit">
     <h1>Log In</h1>
 
     <label for="email">Email:</label>
@@ -8,6 +8,6 @@
         <pre style="color: red;">{{ .error }}</pre>
     {{ end }}
 
-    <input type="submit" value="Get OTP">
+    <input type="submit">
 </form>
 {{ end }}

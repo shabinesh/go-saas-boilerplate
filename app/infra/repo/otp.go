@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v5"
 
@@ -30,9 +31,9 @@ func (o *OTPRepository) SaveOTP(userID user.UserID, otp string) error {
 
 func (o *OTPRepository) GetOTP(userID user.UserID) (*user.OTP, error) {
 	var otp user.OTP
-	err := o.db.QueryRow(context.Background(), "SELECT id, user_id, otp_code, created_at FROM otps WHERE user_id = ?", userID).Scan(&otp.ID, &otp.UserID, &otp.Code, &otp.CreatedAt)
+	err := o.db.QueryRow(context.Background(), "SELECT id, user_id, otp_code, created_at FROM otps WHERE user_id = $1", userID).Scan(&otp.ID, &otp.UserID, &otp.Code, &otp.CreatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("invalid otp")
 		}
 
