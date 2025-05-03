@@ -1,20 +1,49 @@
 package handlers
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"os"
+	"time"
 
-// gin auth middleware
-func (h handlers) RequireAuth() gin.HandlerFunc {
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+)
+
+func (h handlers) ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sess, _ := h.sessionStore.Get(c.Request, sessionKey)
-		if v, ok := sess.Values["authenticated"]; !ok || v != true {
-			c.Abort()
-			c.Redirect(302, "/login")
-		} else {
-			c.Next()
+		// Get JWT token from cookie
+		tokenString, err := c.Cookie("token")
+		if err != nil {
+			c.AbortWithStatus(401)
 			return
 		}
 
-		c.Abort()
-		c.Redirect(302, "/login")
+		// Parse and validate the token
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// Validate signing method
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			// Return the secret key used for signing
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
+
+		if err != nil || !token.Valid {
+			c.AbortWithStatus(401)
+			return
+		}
+
+		// Check token expiration
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			exp, ok := claims["exp"].(float64)
+			if !ok || float64(time.Now().Unix()) > exp {
+				c.AbortWithStatus(401)
+				return
+			}
+			// Add user info to context
+			c.Set("user_id", claims["user_id"])
+		}
+
+		c.Next()
 	}
 }

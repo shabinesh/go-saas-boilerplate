@@ -2,3 +2,6 @@ test.db
 vendor/
 transcription
 main
+.env
+.idea
+.vscode

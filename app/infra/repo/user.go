@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"github.com/jackc/pgx/v5"
 
 	"github.com/google/uuid"
@@ -19,31 +20,31 @@ func NewUserRepo(db *pgx.Conn) *UserRepo {
 	return &UserRepo{db: db}
 }
 
-func (u *UserRepo) FindUser(id string) (*user.User, bool, error) {
+func (u *UserRepo) FindUser(id string) (*user.User, error) {
 	r := u.db.QueryRow(context.Background(), "SELECT * FROM users WHERE id = $1", id)
 
 	var uu user.User
 	err := r.Scan(&uu.ID, &uu.Email, &uu.IsVerified, &uu.IsActive, &uu.CreatedAt)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
 
-	return &uu, true, nil
+	return &uu, nil
 }
 
-func (u *UserRepo) FindUserByEmail(email string) (*user.User, bool, error) {
+func (u *UserRepo) FindUserByEmail(email string) (*user.User, error) {
 	r := u.db.QueryRow(context.Background(), "SELECT * FROM users WHERE email = $1", email)
 	var uu user.User
 	err := r.Scan(&uu.ID, &uu.Email, &uu.IsVerified, &uu.IsActive, &uu.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, false, nil
+			return nil, nil
 		}
 
-		return nil, false, err
+		return nil, err
 	}
 
-	return &uu, true, nil
+	return &uu, nil
 }
 
 func (u *UserRepo) AddUser(uu *user.User) (*user.User, error) {

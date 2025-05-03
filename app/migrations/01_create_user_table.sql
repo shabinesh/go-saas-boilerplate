@@ -12,7 +12,10 @@ CREATE TABLE IF NOT EXISTS otps (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL UNIQUE,
     otp_code VARCHAR(6) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    reason VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT check_reason CHECK (reason IN ('login', 'register'))
 );
 
 CREATE OR REPLACE FUNCTION update_created_at()

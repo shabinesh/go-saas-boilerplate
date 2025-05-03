@@ -1,28 +1,45 @@
 {{ define "content" }}
-<h1>Sign Up</h1>
-<form hx-post="/register"
-      hx-swap="outerHTML swap:1s"
-      hx-trigger="submit"
-      hx-indicator="#loading">
-    <div class="form-group">
-        <label for="fullname">Full Name</label>
-        <input type="text"
-               id="fullname"
-               name="fullname"
-               required
-               hx-validate="true">
+<div class="row" style="max-width: 500px; margin: 4rem auto;">
+    <div class="twelve columns">        
+        <form hx-post="/register" hx-swap="outerHTML swap:1s" hx-trigger="submit">
+            <h3 style="text-align: center; margin-bottom: 2rem;">Create Your Account</h3>
+            
+            <div class="row">
+                <div class="twelve columns">
+                    <label for="fullname">Full Name</label>
+                    <input class="u-full-width" 
+                           type="text" 
+                           id="fullname" 
+                           name="fullname" 
+                           required 
+                           hx-validate="true"
+                           placeholder="Enter your full name">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="twelve columns">
+                    <label for="email">Email</label>
+                    <input class="u-full-width" 
+                           type="email" 
+                           id="email" 
+                           name="email" 
+                           required 
+                           hx-validate="true"
+                           placeholder="Enter your email">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="twelve columns">
+                    <button class="button-primary u-full-width" 
+                            type="submit"
+                            style="margin-top: 1rem;">
+                        Register
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email"
-               id="email"
-               name="email"
-               required
-               hx-validate="true">
-    </div>
-    <button type="submit">Register</button>
-    <div id="loading" class="htmx-indicator">
-        Registering...
-    </div>
-</form>
+</div>
 {{ end }}

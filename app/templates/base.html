@@ -6,35 +6,19 @@
     <title>Your Title Here</title>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     <!-- <link href="https://unpkg.com/bonsai.css@latest/dist/bonsai.min.css" rel="stylesheet"> -->
-    <link rel="stylesheet" href="https://matcha.mizu.sh/matcha.css">
+    <link href="https://cdn.jsdelivr.net/npm/skeleton-css@2.0.4/css/skeleton.css" rel="stylesheet" type="text/css">
 </head>
 <body>
     <div class="container">
         <div class="title">
             App
         </div>
-        <nav>
-            <menu>
-              <li>
-                <a href="#">Viennoiseries</a>
-                <menu>
-                  <li><a href="#">Croissant</a></li>
-                  <li><a href="#">Éclair</a></li>
-                  <li>
-                    <a href="#">Tartelettes</a>
-                    <menu>
-                      <li><a href="#">Aux mûres</a></li>
-                      <li><a href="#">Aux framboises</a></li>
-                      <li class="disabled"><a href="#">Aux fraises</a></li>
-                    </menu>
-                  </li>
-                  <li><a href="#">Pain au chocolat</a></li>
-                </menu>
-              </li>
-              <li class="selected"><a href="#">Macarons</a></li>
-              <li class=""><a href="/logout">logout</a></li>
-            </menu>
-          </nav>
+        <nav class="fixed bottom-0 w-full bg-gray-800 text-white flex justify-around">
+          <a href="/" class="p-4">Home</a>
+          <a href="/about" class="p-4">About</a>
+          <a href="/logout" class="p-4">Logout</a>
+        </nav>
+
         <!-- Your content goes here -->
 
         <div id="content">

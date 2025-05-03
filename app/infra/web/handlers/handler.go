@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 
+	"github.com/gin-gonic/gin"
 	"github.com/shabinesh/app/core/user"
 
 	"github.com/gorilla/securecookie"
@@ -15,9 +16,10 @@ var emailTemplates = template.Must(
 
 type UserService interface {
 	Register(email string, info map[string]string) (*user.User, error)
-	VerifyCode(userID string, otp string) error
-	SendOTP(id user.UserID) error
-	Authenticate(email, code string) (*user.User, error)
+	VerifyCode(userID string, otp string, reason string) error
+	SendOTP(id user.UserID, reason string) error
+	SendLoginOTP(email string) error
+	Authenticate(w gin.ResponseWriter, email, code, reason string) (*user.User, error)
 	GetUser(email string) (*user.User, error)
 }
 

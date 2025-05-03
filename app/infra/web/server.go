@@ -1,16 +1,20 @@
 package web
 
 import (
+	"log"
+	"os"
+
 	"github.com/jackc/pgx/v5"
 
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
-	"github.com/shabinesh/app/core/user"
 	"github.com/shabinesh/app/infra/repo"
 	"github.com/shabinesh/app/infra/web/handlers"
 	"github.com/shabinesh/app/services/mailer"
 	"github.com/shabinesh/app/services/otp"
+	"github.com/shabinesh/app/services/user"
 )
 
 func createRender() multitemplate.Renderer {
@@ -26,6 +30,11 @@ func createRender() multitemplate.Renderer {
 }
 
 func StartServer(db *pgx.Conn) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	server := gin.Default()
 	server.HTMLRender = createRender()
 
@@ -33,20 +42,20 @@ func StartServer(db *pgx.Conn) {
 	otpRepo := repo.NewOTPRepository(db)
 	otpService := otp.NewOTPService(otpRepo)
 	emailer := mailer.NewMockMailer()
-	userService := user.NewUserService(userRepo, otpService, emailer)
+	userService := user.NewUserService(userRepo, otpService, emailer, []byte(os.Getenv("JWT_SECRET")))
 	apiHandler := handlers.NewHandlers(userService)
 
 	server.POST("/register", apiHandler.Register)
 	server.GET("/register", apiHandler.RegisterPage)
-	server.POST("/verify-otp", apiHandler.GetOTP)
+	server.POST("/verify-otp", apiHandler.VerifyCode)
 	server.GET("/login", apiHandler.LoginPage)
-	server.POST("/login", apiHandler.LoginPage)
+	server.POST("/login", apiHandler.Login)
 	server.POST("/authenticate", apiHandler.Authenticate)
 	server.GET("/logout", apiHandler.Logout)
 
 	// protected routes
 	protected := server.Group("/app")
-	protected.Use(apiHandler.RequireAuth())
+	protected.Use(apiHandler.ValidateJWT())
 	{
 		protected.GET("/home", apiHandler.HomePage)
 	}
